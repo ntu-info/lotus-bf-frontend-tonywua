@@ -58,118 +58,65 @@ export default function App () {
 
   return (
     <div className="app">
-      {/* Inline style injection to enforce no-hover look */}
-      <style>{`
-        :root {
-          --primary-600: #2563eb;
-          --primary-700: #1d4ed8;
-          --primary-800: #1e40af;
-          --border: #e5e7eb;
-        }
-        .app { padding-right: 0 !important; }
-        .app__grid { width: 100vw; max-width: 100vw; }
-        .card input[type="text"],
-        .card input[type="search"],
-        .card input[type="number"],
-        .card select,
-        .card textarea {
-          width: 100% !important;
-          max-width: 100% !important;
-          display: block;
-        }
-        /* Downsized buttons */
-        .card button,
-        .card [role="button"],
-        .card .btn,
-        .card .button {
-          font-size: 12px !important;
-          padding: 4px 8px !important;
-          border-radius: 8px !important;
-          line-height: 1.2 !important;
-          background: var(--primary-600) !important;
-          color: #fff !important;
-          border: none !important;
-        }
-        /* No visual change on hover/active */
-        .card button:hover,
-        .card button:active,
-        .card [role="button"]:hover,
-        .card [role="button"]:active,
-        .card .btn:hover,
-        .card .btn:active,
-        .card .button:hover,
-        .card .button:active {
-          background: var(--primary-600) !important;
-          color: #fff !important;
-        }
-        /* Toolbars / chips also no-hover */
-        .card .toolbar button,
-        .card .toolbar [role="button"],
-        .card .toolbar .btn,
-        .card .toolbar .button,
-        .card .qb-toolbar button,
-        .card .qb-toolbar [role="button"],
-        .card .qb-toolbar .btn,
-        .card .qb-toolbar .button,
-        .card .query-builder button,
-        .card .query-builder [role="button"],
-        .card .query-builder .btn,
-        .card .query-builder .button,
-        .card .chip,
-        .card .pill,
-        .card .tag {
-          background: var(--primary-600) !important;
-          color: #fff !important;
-          border: none !important;
-        }
-        .card .toolbar button:hover,
-        .card .qb-toolbar button:hover,
-        .card .query-builder button:hover,
-        .card .chip:hover,
-        .card .pill:hover,
-        .card .tag:hover,
-        .card .toolbar button:active,
-        .card .qb-toolbar button:active,
-        .card .query-builder button:active {
-          background: var(--primary-600) !important;
-          color: #fff !important;
-        }
-        /* Disabled stays same color but dimmer for affordance */
-        .card .toolbar button:disabled,
-        .card .qb-toolbar button:disabled,
-        .card .query-builder button:disabled,
-        .card button[disabled],
-        .card [aria-disabled="true"] {
-          background: var(--primary-600) !important;
-          color: #fff !important;
-          opacity: .55 !important;
-        }
-      `}</style>
+      {/* Inline style overrides removed — visual tokens and layout handled in App.css */}
 
       <header className="app__header">
-        <h1 className="app__title">LoTUS-BF</h1>
+        <div className="app__header-row">
+          <h1 className="app__title">LoTUS-BF</h1>
+          <div className="app__brand-badge">Search</div>
+          <div className="app__header-decor" aria-hidden>
+            <div className="spark">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <path d="M12 2C12 2 15 6 18 6C21 6 22 9 22 11C22 14 20 16 18 18C16 20 12 22 12 22C12 22 8 20 6 18C4 16 2 14 2 11C2 9 3 6 6 6C9 6 12 2 12 2Z" stroke="rgba(59,130,246,0.9)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="11" r="1.8" fill="rgba(59,130,246,0.9)" />
+              </svg>
+            </div>
+          </div>
+        </div>
         <div className="app__subtitle">Location-or-Term Unified Search for Brain Functions</div>
+        <div className="app__query-display">Current query:
+          {query ? (
+            <span className="search-term-inline">{
+              // render query tokens but avoid highlighting operators like AND/OR/NOT
+              String(query).split(/\s+/).map((t, i) => {
+                const low = t.toLowerCase()
+                if (['and','or','not','reset','(',')'].includes(low)) {
+                  return <span key={i} style={{ marginLeft: 6, color: 'var(--muted)' }}>{t}</span>
+                }
+                return <span key={i} className='search-term' style={{ marginLeft: 6 }}>{t}</span>
+              })
+            }</span>
+          ) : (
+            <span className="search-term">(empty)</span>
+          )}
+        </div>
       </header>
 
       <main className="app__grid" ref={gridRef}>
         <section className="card" style={{ flexBasis: `${sizes[0]}%` }}>
           <div className="card__title">Terms</div>
-          <Terms onPickTerm={handlePickTerm} />
+          <div className="card__body panel panel--soft">
+            <Terms onPickTerm={handlePickTerm} />
+          </div>
         </section>
 
         <div className="resizer" aria-label="Resize left/middle" onMouseDown={(e) => startDrag(0, e)} />
 
         <section className="card card--stack" style={{ flexBasis: `${sizes[1]}%` }}>
-          <QueryBuilder query={query} setQuery={setQuery} />
-          {/* <div className="hint">Current Query：<code className="hint__code">{query || '(empty)'}</code></div> */}
-          <div className="divider" />
-          <Studies query={query} />
+          <div className="card__body">
+            <QueryBuilder query={query} setQuery={setQuery} />
+            {/* <div className="hint">Current Query：<code className="hint__code">{query || '(empty)'}</code></div> */}
+            <div className="divider" />
+            <Studies query={query} />
+          </div>
         </section>
 
         <div className="resizer" aria-label="Resize middle/right" onMouseDown={(e) => startDrag(1, e)} />
 
         <section className="card" style={{ flexBasis: `${sizes[2]}%` }}>
-          <NiiViewer query={query} />
+          <div className="card__body">
+            <NiiViewer query={query} />
+          </div>
         </section>
       </main>
     </div>

@@ -3,6 +3,34 @@ import { useEffect, useMemo, useState } from 'react'
 
 function classNames (...xs) { return xs.filter(Boolean).join(' ') }
 
+function escapeRegExp (s) { return String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
+// tokens to ignore (query operators / UI controls)
+const HIGHLIGHT_IGNORE = new Set(['and', 'or', 'not', 'reset', '(', ')'])
+function highlightText (text, query) {
+  if (!text) return ''
+  if (!query) return text
+  try {
+    const q = String(query).trim()
+    if (!q) return text
+    const parts = q.split(/\s+/).filter(Boolean).map(escapeRegExp).filter(p => !HIGHLIGHT_IGNORE.has(p.toLowerCase()))
+    if (!parts.length) return text
+    const re = new RegExp(`(${parts.join('|')})`, 'ig')
+    const nodes = []
+    let lastIndex = 0
+    let m
+    while ((m = re.exec(text)) !== null) {
+      const idx = m.index
+      if (idx > lastIndex) nodes.push(text.slice(lastIndex, idx))
+      nodes.push(<span key={idx + '-' + m[0]} className='search-term'>{m[0]}</span>)
+      lastIndex = idx + m[0].length
+    }
+    if (lastIndex < text.length) nodes.push(text.slice(lastIndex))
+    return nodes.length ? nodes : text
+  } catch (e) {
+    return text
+  }
+}
+
 export function Studies ({ query }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -112,9 +140,9 @@ export function Studies ({ query }) {
                 pageRows.map((r, i) => (
                   <tr key={i} className={classNames(i % 2 ? 'bg-white' : 'bg-gray-50')}>
                     <td className='whitespace-nowrap px-3 py-2 align-top'>{r.year ?? ''}</td>
-                    <td className='px-3 py-2 align-top'>{r.journal || ''}</td>
-                    <td className='max-w-[540px] px-3 py-2 align-top'><div className='truncate' title={r.title}>{r.title || ''}</div></td>
-                    <td className='px-3 py-2 align-top'>{r.authors || ''}</td>
+                      <td className='px-3 py-2 align-top'>{query ? highlightText(r.journal || '', query) : (r.journal || '')}</td>
+                      <td className='max-w-[540px] px-3 py-2 align-top'><div className='truncate' title={r.title}>{query ? highlightText(r.title || '', query) : (r.title || '')}</div></td>
+                      <td className='px-3 py-2 align-top'>{query ? highlightText(r.authors || '', query) : (r.authors || '')}</td>
                   </tr>
                 ))
               )}

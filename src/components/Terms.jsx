@@ -33,7 +33,11 @@ export function Terms ({ onPickTerm }) {
   const filtered = useMemo(() => {
     const s = search.trim().toLowerCase()
     if (!s) return terms
-    return terms.filter(t => t.toLowerCase().includes(s))
+    // If there's an exact term match, show only exact matches.
+    const hasExact = terms.some(t => t.toLowerCase() === s)
+    if (hasExact) return terms.filter(t => t.toLowerCase() === s)
+    // Otherwise prefer prefix matching (avoid mid-word matches like hemo* when searching 'emo')
+    return terms.filter(t => t.toLowerCase().startsWith(s))
   }, [terms, search])
 
   return (

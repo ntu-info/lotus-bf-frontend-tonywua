@@ -6,7 +6,11 @@
   --muted: #6b7280;
   --border: #e5e7eb;
   --radius: 14px;
-  --primary-600: #2563eb;
+  --primary-600: #60a5fa; /* light blue */
+  --primary-700: #3b82f6;
+  --primary-800: #1d4ed8;
+  --primary-100: #eef6ff;
+  --primary-200: #dbeafe;
   --btn-font-size: 12px;
   --btn-py: 6px;
   --btn-px: 10px;
@@ -25,23 +29,55 @@ body {
 .app {
   max-width: none;
   margin: 0;
-  padding: 18px 0 18px 18px;
+  padding: 18px;
 }
 
-.app__header { margin-bottom: 14px; }
-.app__title { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: .2px; }
-.app__subtitle { margin-top: 4px; color: var(--muted); font-size: 13px; }
+.app__header { margin-bottom: 14px; padding:12px; border:1px solid var(--primary-200); border-radius:12px; background: linear-gradient(180deg, rgba(238,246,255,0.6), rgba(255,255,255,0.4)); box-shadow: 0 6px 16px rgba(16,24,40,0.04); }
+.app__header-row{ display:flex; align-items:center; gap:12px; }
+.app__title { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: .2px; color: var(--primary-800); }
+.app__brand-badge { background: linear-gradient(90deg, rgba(96,165,250,0.12), rgba(59,130,246,0.06)); color:var(--primary-800); padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; border:1px solid rgba(59,130,246,0.12); }
+.app__subtitle { margin-top: 6px; color: var(--muted); font-size: 13px; }
+.app__query-display { margin-top:8px; font-size:13px; color:var(--muted); }
+.search-term { background: #fff59d; color: #111827; padding:4px 10px; border-radius:10px; margin-left:8px; display:inline-block; box-shadow: 0 2px 6px rgba(16,24,40,0.06); }
+.search-term-inline > span.search-term { margin-left: 6px; }
 
-.app__grid { display: flex; gap: 0; width: 100%; }
-.app__grid > .card { flex: 1 1 0; min-width: 240px; overflow: auto; }
+.app__header-decor { margin-left: auto; display:inline-flex; align-items:center; gap:10px }
+.app__header-decor .spark { width:36px; height:36px; border-radius:8px; background: linear-gradient(135deg, rgba(96,165,250,0.08), rgba(59,130,246,0.04)); display:flex; align-items:center; justify-content:center; border:1px solid rgba(59,130,246,0.08); }
+.app__header-decor .spark svg { width:18px; height:18px; color:var(--primary-700); }
+
+.app__grid { display: flex; gap: 0; width: 100%; max-width: 100%; }
+.app__grid > .card { flex: 1 1 0; min-width: 240px; overflow: hidden; }
 
 .resizer { width: 8px; cursor: col-resize; position: relative; user-select: none; touch-action: none; align-self: stretch; background: transparent; }
 .resizer::after { content:''; position:absolute; top:0; bottom:0; left:3px; width:2px; background: var(--border); transition: background .15s ease; }
 .resizer:hover::after { background: #9ca3af; }
 
-.card { background:white; border:1px solid var(--border); border-radius: var(--radius); padding:12px; }
-.card__title { font-weight:600; margin-bottom:10px; }
+.card { background: white; border: 1px solid var(--border); border-radius: var(--radius); }
+.card { display: flex; flex-direction: column; }
+.card__title { font-weight:700; margin-bottom:10px; }
 .card--stack > .divider { height:1px; background:var(--border); margin:12px 0; }
+
+/* internal scrolling body inside cards */
+.card__body { min-height: 0; overflow: auto; padding: 12px; }
+
+/* Major boxed headings used for prominent sections like Threshold, Coordinates */
+.major-title,
+.card__body h1,
+.card__body h2,
+.card__body h3 {
+  display: inline-block;
+  background: var(--primary-100);
+  border: 1px solid var(--primary-200);
+  color: var(--primary-800);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* keep small labels like 'mode' from changing — those are usually plain labels */
+.card label { font-size: 13px; font-weight: 600; color: var(--fg); }
 
 .hint { margin-top: 8px; color: var(--muted); font-size: 12px; }
 .hint__code { background:#f3f4f6; padding:2px 6px; border-radius:8px; }
@@ -69,7 +105,19 @@ button:disabled, .btn:disabled { opacity:.55; cursor:not-allowed; }
 .card input[type="search"],
 .card input[type="number"],
 .card select,
-.card textarea { width:100%; max-width:100%; display:block; }
+.card textarea { 
+  width:100%; max-width:100%; display:block; 
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:8px 12px;
+  background:#f7f7f8;
+}
+.card input:focus,
+.card select:focus,
+.card textarea:focus{
+  box-shadow: 0 0 0 2px rgba(96,165,250,.35);
+  outline: none;
+}
 
 .app__footer { margin-top:16px; color:var(--muted); font-size:12px; display:flex; gap:10px; align-items:center; border-top:1px solid var(--border); padding-top:12px; }
 
@@ -92,8 +140,37 @@ button:disabled, .btn:disabled { opacity:.55; cursor:not-allowed; }
 }
 
 .qb__input:focus {
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 0 0 2px rgba(96,165,250,.35);
 }
+
+/* Panels and Terms */
+.panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.panel--soft {
+  border-color: var(--primary-200);
+  background: var(--primary-100);
+}
+.term-item {
+  border:1px solid var(--primary-200);
+  background:#f7f9fc;
+  border-radius:12px;
+  padding:8px 10px;
+  margin-bottom:8px;
+}
+.term-item:hover { border-color: var(--primary-600); }
+
+/* Slider / range control styling for Gaussian FWHM and Overlay alpha */
+.control-row { display:flex; align-items:center; gap:12px; margin-top:8px; }
+.control-label { min-width: 140px; color:var(--muted); font-weight:600; }
+.control-range { flex: 1 1 auto; }
+.control-value { min-width:36px; text-align:right; color:var(--muted); }
+
+/* ensure image thumbs in NiiViewer appear in expected order and layout */
+.card__body .nii-thumbs, .card__body .nii-thumbs-wrapper { display:flex; gap:12px; align-items:flex-start; }
+.card__body .nii-thumbs img { width: 96px; height: 96px; object-fit:cover; border:1px solid var(--border); border-radius:6px; }
 
 
 /* Ensure QueryBuilder input doesn't collapse too narrow */

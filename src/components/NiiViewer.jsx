@@ -388,9 +388,10 @@ const coord2idx = (c_mm, n, axis) => {
   const [nx, ny, nz] = dims
 
   // slice configs (labels only; numbers removed)
+  // Order views as X, Y, Z (Sagittal, Coronal, Axial)
   const sliceConfigs = [
-    { key: 'y', name: 'Coronal',  axisLabel: 'Y', index: iy, setIndex: setIy, max: Math.max(0, ny-1), canvasRef: canvases[1] },
     { key: 'x', name: 'Sagittal', axisLabel: 'X', index: ix, setIndex: setIx, max: Math.max(0, nx-1), canvasRef: canvases[2] },
+    { key: 'y', name: 'Coronal',  axisLabel: 'Y', index: iy, setIndex: setIy, max: Math.max(0, ny-1), canvasRef: canvases[1] },
     { key: 'z', name: 'Axial',    axisLabel: 'Z', index: iz, setIndex: setIz, max: Math.max(0, nz-1), canvasRef: canvases[0] },
   ]
 
@@ -409,18 +410,19 @@ const coord2idx = (c_mm, n, axis) => {
 
       {/* --- Threshold mode & value --- */}
       <div className='rounded-xl border p-3 text-sm'>
-        <label className='flex items-center gap-2'>
-          <span>Threshold mode</span>
+        <div className='major-title'>Threshold</div>
+        <div style={{ marginTop: 6 }}>
+          <div style={{ marginBottom: 6, fontWeight: 600 }}>Threshold mode</div>
           <select value={thrMode} onChange={e=>setThrMode(e.target.value)} className='rounded-lg border px-2 py-1'>
             <option value='value'>Value</option>
             <option value='pctl'>Percentile</option>
           </select>
-        </label>
+        </div>
         <br />
         {thrMode === 'value' ? (
           <>
             <label className='flex items-center gap-2'>
-              <span>Threshold</span>
+              <span>Value</span>
               <input type='number' step='0.01' value={thrValue} onChange={e=>setThrValue(Number(e.target.value))} className='w-28 rounded-lg border px-2 py-1' />
             </label>
             <br />
@@ -434,6 +436,11 @@ const coord2idx = (c_mm, n, axis) => {
             <br />
           </>
         )}
+
+        {/* Coordinates heading placed above coordinate inputs */}
+        <div style={{ marginTop: 8 }}>
+          <div className='major-title'>Coordinates</div>
+        </div>
 
         {/* Neurosynth-style coordinate inputs (signed, centered at 0) */}
         <div className='mt-1 flex items-center gap-4'>
@@ -506,19 +513,24 @@ const coord2idx = (c_mm, n, axis) => {
 
       {/* map generation params */}
       <div className='rounded-xl border p-3 text-sm'>
-        <label className='flex flex-col'>Gaussian FWHM:
-          <input type='number' step='0.5' value={fwhm} onChange={e=>setFwhm(Number(e.target.value)||0)} className='w-28 rounded-lg border px-2 py-1'/>
-          <br />
-        </label>
+        <div className='control-row'>
+          <div className='control-label'>Gaussian FWHM</div>
+          <div className='control-range'>
+            <input type='range' min={0} max={50} step={0.5} value={fwhm} onChange={e=>setFwhm(Number(e.target.value)||0)} className='w-full' />
+          </div>
+          <div className='control-value'>{String(fwhm)}</div>
+        </div>
       </div>
 
       {/* overlay controls */}
       <div className='rounded-xl border p-3 text-sm'>
-        <label className='flex items-center gap-2'>
-          <span>Overlay alpha</span>
-          <input type='range' min={0} max={1} step={0.05} value={overlayAlpha} onChange={e=>setOverlayAlpha(Number(e.target.value))} className='w-40' />
-        </label>
-        <br />
+        <div className='control-row'>
+          <div className='control-label'>Overlay alpha</div>
+          <div className='control-range'>
+            <input type='range' min={0} max={1} step={0.01} value={overlayAlpha} onChange={e=>setOverlayAlpha(Number(e.target.value))} className='w-full' />
+          </div>
+          <div className='control-value'>{overlayAlpha.toFixed(2)}</div>
+        </div>
       </div>
     </div>
   )
